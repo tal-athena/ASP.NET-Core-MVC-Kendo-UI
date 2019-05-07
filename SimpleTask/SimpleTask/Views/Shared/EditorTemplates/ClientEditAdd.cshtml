@@ -1,0 +1,101 @@
+﻿@model SimpleTask.Models.ClientDto
+
+<div class="k-edit-form-container">
+        
+    @Html.HiddenFor(model => model.id)
+
+    <div style="margin-left:30px;">
+        <img id="logoImage" style="height:200px;width:200px" />
+        <input type="file" id="logoInput" data-bind="value:logoUrl" accept ="image/*" onchange="readURL(this);">
+        
+
+    </div>
+    
+    <div style="margin-left:30px;">
+        
+    </div>
+    <div class="k-edit-label">
+        @Html.Label("Name")
+    </div>
+    <div class="k-edit-field">
+        @Html.EditorFor(model => model.name)
+        @Html.ValidationMessageFor(model => model.name)
+    </div>
+
+    <div class="k-edit-label">
+        @Html.Label("Address1")
+    </div>
+    <div class="k-edit-field">
+        @Html.EditorFor(model => model.address1)
+        @Html.ValidationMessageFor(model => model.address1)
+    </div>
+
+    <div class="k-edit-label">
+        @Html.Label("Address2")
+    </div>
+    <div class="k-edit-field">
+        @Html.EditorFor(model => model.address2)
+        @Html.ValidationMessageFor(model => model.address2)
+    </div>
+
+    <div class="k-edit-label">
+        @Html.Label("Suburb")
+    </div>
+    <div class="k-edit-field">
+        @Html.EditorFor(model => model.suburb)
+        @Html.ValidationMessageFor(model => model.suburb)
+    </div>
+
+    <div class="k-edit-label">
+        @Html.Label("Postcode")
+    </div>
+    <div class="k-edit-field">
+        @Html.EditorFor(model => model.postcode)
+        @Html.ValidationMessageFor(model => model.postcode)
+    </div>
+
+    <div class="k-edit-label">
+        @Html.Label("Country")
+    </div>
+    <div class="k-edit-field">
+        @Html.EditorFor(model => model.country)
+        @Html.ValidationMessageFor(model => model.country)
+    </div>
+
+    <div class="k-edit-label">
+        @Html.Label("Type")
+    </div>
+    <div class="k-edit-field">
+        @Html.EditorFor(model => model.type)
+        @Html.ValidationMessageFor(model => model.type)
+    </div>
+
+
+    <div class="k-edit-label">
+        @Html.Label("Status")
+    </div>
+    <div class="k-edit-field">
+        @Html.EditorFor(model => model.status)
+        @Html.ValidationMessageFor(model => model.status)
+    </div>
+
+    <script>
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#logoImage')
+                        .attr('src', e.target.result)
+                        .width(200)
+                        .height(200);
+
+                };
+
+                reader.readAsDataURL(input.files[0]);                
+            }
+        }
+    </script>
+
+
+</div>

@@ -1,0 +1,222 @@
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<div class="row">
+    <div class="col-xs-18 col-md-12">
+        @(Html.Kendo().Grid<SimpleTask.Models.ClientDto>
+            ()
+            .Name("Client")
+            .Columns(columns =>
+            {
+                columns.Bound(p => p.logoUrl).ClientTemplate(
+                    @"<img src = '#= logoUrl #'/>").Title("Logo");                  
+                columns.Bound(p => p.name).Title("Name");
+                //columns.Bound(p => p.projects.ToString());
+                columns.Bound(p => p.address1).Title("Address1");
+                columns.Bound(p => p.address2).Title("Address2");
+                columns.Bound(p => p.suburb).Title("Suburb");
+                columns.Bound(p => p.postcode).Title("Postcode");
+                columns.Bound(p => p.country).Title("Country");
+                columns.Bound(p => p.type).Title("Type");
+                columns.Bound(p => p.status).Title("Status");
+                columns.Command(command => { command.Custom("View Details").Click("showDetails"); });
+                columns.Command(command => { command.Edit(); command.Destroy(); }).Width(172);
+            })
+                        .ToolBar(toolbar => toolbar.Create())
+                        .Editable(editable => editable.Mode(GridEditMode.PopUp).TemplateName("ClientEditAdd").Window(w => w.Title("Add or Edit User")))
+                        .Pageable()
+                        .Sortable()
+                        .Scrollable()
+                        //.HtmlAttributes(new { style = "height:430px;" })
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .PageSize(20)
+                            .Events(events => events.Error("error_handler"))
+                            .Model(model => model.Id(p => p.id))
+                            .Create(update => update.Action("Client_Create", "Client"))
+                            .Read(read => read.Action("Clients_Read", "Client"))
+                            .Update(update => update.Action("Client_Update", "Client"))
+                            .Destroy(update => update.Action("Client_Destroy", "Client"))
+                        )
+        )
+        @(Html.Kendo().Window().Name("Details")
+                                    .Title("Client Details")
+                                    .Visible(false)
+                                    .Modal(true)
+                                    .Draggable(true)
+                                    .Width(1000)
+
+        )
+    </div>
+</div>
+<div id="tabview" class="demo-section k-content">
+    @(Html.Kendo().TabStrip()
+                                          .Name("tabstrip")
+                                          .Animation(animation =>
+                                              animation.Open(effect =>
+                                                  effect.Fade(FadeDirection.In)))
+                                          .Items(tabstrip =>
+                                          {
+                                              tabstrip.Add().Text("Contracts")
+                                                  .Selected(true)
+                                                  .Content(@<text>
+                                                    <div id="details-contracts-container">
+                                                        @(Html.Kendo().Grid<SimpleTask.Models.ContactDto>()
+                                                                       .Name("detail-contacts")
+                                                                       .Columns(columns =>
+                                                                       {
+                                                                                      columns.Bound(c => c.name);
+                                                                                      columns.Bound(c => c.address1);
+                                                                                      columns.Bound(c => c.address2);
+                                                                                      columns.Bound(c => c.suburb);
+                                                                                      columns.Bound(c => c.postcode);
+                                                                                      columns.Bound(c => c.country);
+                                                                                      columns.Bound(c => c.phone);
+                                                                                      columns.Bound(c => c.email);
+                                                                                      columns.Bound(c => c.position);
+                                                                                      columns.Bound(c => c.defaultContact);
+                                                                                  })
+                                                                       .HtmlAttributes(new { style = "height: 250px;" })
+                                                                       .Scrollable()
+                                                                       .Groupable()
+                                                                       .Sortable()
+                                                                       .Pageable(pageable => pageable
+                                                                           .Refresh(true)
+                                                                           .PageSizes(true)
+                                                                           .ButtonCount(5))
+                                                        )
+                                                    </div>
+                                                </text>);
+
+                                                                                      tabstrip.Add().Text("points")
+                                                                                        .Content(@<text>
+                                                                                            <div id="details-features-container">
+                                                                                                @(Html.Kendo().Grid<SimpleTask.Models.FeatureDto>()
+                                                                                                                            .Name("detail-features")
+                                                                                                                            .Columns(columns =>
+                                                                                                                            {
+                                                                                                                                columns.Bound(c => c.name);
+                                                                                                                                columns.Bound(c => c.icon);
+                                                                                                                                columns.Bound(c => c.url);
+                                                                                                                            })
+                                                                                                                            .HtmlAttributes(new { style = "height: 250px;" })
+                                                                                                                            .Scrollable()
+                                                                                                                            .Groupable()
+                                                                                                                            .Sortable()
+                                                                                                                            .Pageable(pageable => pageable
+                                                                                                                                .Refresh(true)
+                                                                                                                                .PageSizes(true)
+                                                                                                                                .ButtonCount(5))
+                                                                                                )
+                                                                                            </div>
+                                                                                        </text>);
+                                                                                                                              tabstrip.Add().Text("Projects")
+                                                                                                                                  .Content(@<text>
+                                                                                                                                    <div id="details-projects-container">
+                                                                                                                                        @(Html.Kendo().Grid<SimpleTask.Models.ProjectDto>()
+                                                                                                                                                   .Name("detail-projects")
+                                                                                                                                                   .Columns(columns =>
+                                                                                                                                                   {
+                                                                                                                                                                  columns.Bound(c => c.name);
+                                                                                                                                                                  columns.Bound(c => c.address1);
+                                                                                                                                                                  columns.Bound(c => c.address2);
+                                                                                                                                                                  columns.Bound(c => c.postcode);
+                                                                                                                                                                  columns.Bound(c => c.address2);
+                                                                                                                                                                  columns.Bound(c => c.country);
+                                                                                                                                                              })
+                                                                                                                                                   .HtmlAttributes(new { style = "height: 250px;" })
+                                                                                                                                                   .Scrollable()
+                                                                                                                                                   .Groupable()
+                                                                                                                                                   .Sortable()
+                                                                                                                                                   .Pageable(pageable => pageable
+                                                                                                                                                       .Refresh(true)
+                                                                                                                                                       .PageSizes(true)
+                                                                                                                                                       .ButtonCount(5))
+                                                                                                                                        )
+                                                                                                                                    </div>
+                                                                                                                                </text>);
+                                                                                                                                                                  })
+    )
+</div>
+<!--
+<script type="text/x-kendo-template" id="client-detail-template">
+    <div id="details-container">
+        <h2>#= name #</h2>
+        <em>#= address1 #</em>
+        <dl>
+            <dt>City: #= projects[0].name #</dt>
+            <dt>Address: #= suburb #</dt>
+        </dl>
+    </div>
+</script>
+    -->
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#Details").data("kendoWindow").content($("#tabview"));
+    });
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+
+
+    function showDetails(e) {
+
+        e.preventDefault();
+
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+        var projects = dataItem.projects;
+
+        //projects
+        var projectDataSource = new kendo.data.DataSource({
+            data: projects,
+        });
+
+        var projectGrid = $("#detail-projects").data("kendoGrid");
+        projectGrid.setDataSource(projectDataSource);
+
+        //features
+        var featureDataSource = new kendo.data.DataSource({
+            data: dataItem.features,
+        });
+
+        var featureGrid = $("#detail-features").data("kendoGrid");
+        featureGrid.setDataSource(featureDataSource);
+
+        //contacts
+        var contactDataSource = new kendo.data.DataSource({
+            data: projects,
+        });
+
+        var contactGrid = $("#detail-contacts").data("kendoGrid");
+        contactGrid.setDataSource(contactDataSource);
+
+        var wnd = $("#Details").data("kendoWindow");
+
+        wnd.center().open();
+
+
+        /*
+        var wnd = $("#Details").data("kendoWindow");
+
+        wnd.content(detailsTemplate(dataItem));
+        wnd.center().open();
+        */
+    }
+</script>

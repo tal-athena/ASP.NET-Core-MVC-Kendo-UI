@@ -1,0 +1,83 @@
+@{
+	ViewData["Title"] = "Project Page";
+}
+
+<div class="row">
+    <div class="col-xs-18 col-md-12">
+        @(Html.Kendo().Grid<SimpleTask.Models.ProjectDto>
+    ()
+    .Name("Project")
+    .Columns(columns =>
+    {
+        columns.Bound(p => p.name).Title("Name");
+        //columns.Bound(p => p.client.name).Title("Client Name");
+        columns.Bound(p => p.address1).Title("Address1");
+        columns.Bound(p => p.address2).Title("Address2");
+        columns.Bound(p => p.suburb).Title("Suburb");
+        columns.Bound(p => p.postcode).Title("Postcode");
+        columns.Bound(p => p.country).Title("Country");
+        columns.Command(command => { command.Edit(); command.Destroy(); }).Width(172);
+    })
+    .ToolBar(toolbar => toolbar.Create())
+    .Editable(editable => editable.Mode(GridEditMode.InLine))
+    .Pageable()
+    .Sortable()
+    .Scrollable()
+    .HtmlAttributes(new { style = "height:430px;" })
+    .DataSource(dataSource => dataSource
+    .Ajax()
+    .PageSize(20)
+    .Events(events => events.Error("error_handler"))
+    .Model(model => model.Id(p => p.id))
+    .Create(update => update.Action("Project_Create", "Project"))
+    .Read(read => read.Action("Projects_Read", "Project"))
+    //.Update(update => update.Action("Client_Update", "Client"))
+    //.Destroy(update => update.Action("Client_Destroy", "Client"))
+    )
+    )
+    @(Html.Kendo().Window().Name("ProjectDetails")
+                .Title("Project Details")
+                .Visible(false)
+                .Modal(true)
+                .Draggable(true)
+                .Width(300)
+    )
+</div>
+</div>
+<script type="text/x-kendo-template" id="project-detail-template">
+    <div id="details-container">
+        <h2>#= name #</h2>
+        <em>#= address1 #</em>
+        <dl>
+            <dt>City: #= address2 #</dt>
+            <dt>Address: #= suburb #</dt>
+        </dl>
+    </div>
+</script>
+<script type="text/javascript">
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+
+    var detailsTemplate = kendo.template($("#project-detail-template").html());
+    function showDetails(e) {
+        e.preventDefault();
+
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var wnd = $("#ProjectDetails").data("kendoWindow");
+
+        wnd.content(detailsTemplate(dataItem));
+        wnd.center().open();
+    }
+</script>
