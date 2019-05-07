@@ -1,0 +1,164 @@
+@{
+	ViewData["Title"] = "Home Page";
+}
+
+<div class="row">
+    
+    <div class="col-xs-18 col-md-12">
+        @(Html.Kendo().DropDownList()
+                                                      .Name("buildings")
+                                                      .HtmlAttributes(new { style = "width:40%;margin-bottom:20px" })
+                                                      .OptionLabel("Select building...")
+                                                      .DataTextField("name")
+                                                      .DataValueField("id")
+                                                      .Events(e => e.Change("changeBuilding"))
+                                                      .DataSource(source =>
+                                                      {
+                                                          source.Read(read =>
+                                                          {
+                                                              read.Action("GetBuildings", "Building");
+                                                          });
+                                                      })
+        )
+        @(Html.Kendo().Grid<MarketPlace.Models.NetworkDto>()
+                                                        .Name("networks")
+                                                        .Columns(columns =>
+                                                        {
+                                                            columns.Bound(p => p.ipAddress).Title("Ip Address");
+                                                            columns.Bound(p => p.type).Title("Type");
+                                                            columns.Bound(p => p.port).Title("Port");
+                                                            columns.Bound(p => p.clientId).Title("Client Id");
+                                                            columns.Bound(p => p.buildingId).Title("Building Id");
+                                                            columns.Command(command => { command.Custom("View Details").Click("showDetails"); });
+                                                            columns.Command(command => { command.Edit(); command.Destroy(); }).Width(172);
+                                                        })
+                                                        .ToolBar(toolbar => toolbar.Create())
+                                                        .Editable(editable => editable.Mode(GridEditMode.InLine))
+                                                        .Pageable()
+                                                        .Sortable()
+                                                        .Scrollable()
+                                                        .Filterable()
+                                                        .AutoBind(true)
+                                                        //.HtmlAttributes(new { style = "height:550px;" })
+                                                        .DataSource(dataSource => dataSource
+                                                            .Ajax()
+                                                            .PageSize(20)
+                                                            .Events(events => events.Error("error_handler"))
+                                                            .Model(model => model.Id(p => p.id))
+                                                            .Create(update => update.Action("Network_Create", "Network"))
+                                                            .Read(read => read.Action("Networks_Read", "Network").Data("filterBuildings"))
+                                                            .Update(update => update.Action("Network_Update", "Network"))
+                                                            .Destroy(update => update.Action("Network_Destroy", "Network"))
+                                                        )
+
+        )
+        @(Html.Kendo().Window().Name("Details")
+                                   .Title("Network Details")
+                                   .Visible(false)
+                                   .Modal(true)
+                                   .Draggable(true)
+                                   .Width(800)
+                                   .Content(
+                                   @<div id="detail-treeview-container">
+                                      
+                                    </div>)
+                                   
+                                   
+        )
+    </div>
+</div>
+<div id="detail-treeview-container">
+
+</div>
+<script>
+    $(document).ready(function () {
+        var wnd = $("#Details").data("kendoWindow");
+        wnd.content($("#detail-treeview-container"));
+
+    });
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+    function changeBuilding() {
+        $("#networks").data("kendoGrid").dataSource.read();
+    }
+    function filterBuildings() {
+        return {
+            building: $("#buildings").val()
+        };
+    }
+    function showDetails(e) {
+        
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+        
+
+        var devices = dataItem.devices;
+        
+        var treeData = [];
+
+        for (var i = 0; i < devices.length; i++) {
+            var items = [];
+            if (devices[i].points == null) {
+                treeData.push({
+                    text: devices[i].deviceIdentifier + "(" + devices[i].ipAddress + ")",
+                    items: []
+                });
+                continue;
+            }
+                
+            for (var j = 0; j < devices[i].points.length; j++) {
+                items.push({ text: devices[i].points[j].name + "(" + devices[i].points[j].description + ")" });
+            }
+            treeData.push({
+                text: devices[i].deviceIdentifier + "(" + devices[i].ipAddress + ")",
+                items: items
+            });
+        }
+
+
+        var inlineDefault = new kendo.data.HierarchicalDataSource({
+            data: treeData
+        });
+        
+        /*
+        var inlineDefault = new kendo.data.HierarchicalDataSource({
+            data: [
+                {
+                    text: "Furniture", items: [
+                        { text: "Tables & Chairs" },
+                        { text: "Sofas" },
+                        { text: "Occasional Furniture" }
+                    ]
+                },
+                {
+                    text: "Decor", items: [
+                        { text: "Bed Linen" },
+                        { text: "Curtains & Blinds" },
+                        { text: "Carpets" }
+                    ]
+                }
+            ]
+        });
+        */
+        //$("#detail-treeview-container").kendoTreeView.dataSource = inlineDefault;
+        $("#detail-treeview-container").kendoTreeView({
+            dataSource: inlineDefault,            
+        });
+
+        var wnd = $("#Details").data("kendoWindow");
+        
+        wnd.center().open();
+    }
+</script>
